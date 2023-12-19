@@ -1,0 +1,1 @@
+// Ajouter un middleware protégeant l’ensemble de vos routes des appels DELETE et PATCH , incluez en plus le middleware avec le header Authorization que nous avons fait. Choisiez bien vos code HTTP (400, 422…)
