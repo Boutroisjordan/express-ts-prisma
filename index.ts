@@ -3,21 +3,37 @@ import { authorizeDeleteAndPut } from './middleswares/authorizationMiddleware';
 import api from './routes/api';
  import passport from "passport"
 import cookieParser from 'cookie-parser';
-
-const app: Application = express();
-const port = process.env.PORT || 3000;
-
-app.use(express.json())
-app.use(cookieParser())
-app.use(passport.initialize())
-app.use("/api", api)
+import prisma from './prisma';
 
 
+async function main() {
 
-app.get('/', (req: Request, res: Response) => {
-  res.send('Welcome to Express & TypeScript Server');
-});
+  const app: Application = express();
+  const port = process.env.PORT || 3000;
 
-app.listen(port, () => {
-  console.log(`Server is Fire at http://localhost:${port}`);
-});
+  app.use(express.json())
+  app.use(cookieParser())
+  app.use(passport.initialize())
+  app.use("/api", api)
+
+
+
+  app.get('/', (req: Request, res: Response) => {
+    res.send('Welcome to Express & TypeScript Server');
+  });
+
+  app.listen(port, () => {
+    console.log(`Server is Fire at http://localhost:${port}`);
+  });
+}
+
+main()
+  .then(async () => {
+    await prisma.$disconnect()
+  })
+  .catch(async (e) => {
+    console.error(e)
+    await prisma.$disconnect()
+    process.exit(1)
+  })
+
