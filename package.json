@@ -4,9 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "npm i && npx tsc",
+    "start:prod": "node dist/index",
+    "start:migrate:prod": "npx prisma migrate deploy && npm run start:prod",
+    "build": "npx tsc",
     "start": "node dist/index.js",
-    "dev": "nodemon index.ts"
+    "dev": "nodemon index.ts",
+    "docker:prod": "docker compose --env-file .env -f docker-compose.yml up --build ",
+    "docker:dev": "docker compose --network='host' -f docker-compose.yml up --build "
   },
   "keywords": [],
   "author": "",

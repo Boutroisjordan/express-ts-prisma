@@ -1,11 +1,11 @@
 import express, { Application, Request, Response } from "express";
 
-const dogs = express.Router()
+const dogRoutes = express.Router()
 
-dogs.get('/', (req: Request, res: Response) => {
+dogRoutes.get('/', (req: Request, res: Response) => {
   res.send('Dogs');
 });
-dogs.get('/:id', (req: Request, res: Response) => {
+dogRoutes.get('/:id', (req: Request, res: Response) => {
   res.send(`Dogs ${req.params.id}`);
 });
 // app.put('/', (req: Request, res: Response) => {
@@ -18,4 +18,4 @@ dogs.get('/:id', (req: Request, res: Response) => {
 //   res.send('Welcome to Express & TypeScript Server');
 // });
 
-export default dogs;
+export default dogRoutes;
