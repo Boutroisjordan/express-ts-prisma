@@ -7,4 +7,5 @@ node_modules
 
 #images
 ./uploads/*
-./uploads/
+./uploads/avatars
+./uploads/products
