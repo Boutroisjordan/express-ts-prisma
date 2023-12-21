@@ -6,12 +6,18 @@ import views from './routes/views';
 import cookieParser from 'cookie-parser';
 import prisma from './prisma';
 import path from 'path';
+import fs from "fs"
 
 
 async function main() {
 
   const app: Application = express();
   const port = process.env.PORT || 3000;
+
+  //Créer le dossier 
+  if (!fs.existsSync("./uploads/products")) {
+    fs.mkdirSync("./uploads/products", { recursive: true });
+  }
 
 
   app.use(express.json())

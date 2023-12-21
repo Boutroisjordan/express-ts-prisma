@@ -6,5 +6,4 @@ node_modules
 ./dist/*
 
 #images
-./uploads/avatars
-./uploads/product/*
+./uploads/products/*
