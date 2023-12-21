@@ -14,7 +14,9 @@ model Product {
   id          Int      @id @default(autoincrement())
   name        String
   description String
-  price       Float
+  imagePath   String
+  price       Int
+  reference   String
   order Order[]
 }
 

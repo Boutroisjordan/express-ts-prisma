@@ -17,7 +17,7 @@ export async function findAllUsers(): Promise<Array<User>> {
 export async function createUser(user: User) {
   try {
     const { username, email, password } = user;
-    
+
     const hashedPassword = await encryptPassword(password);
     const newUser = await prisma.user.create({
       data: {
@@ -27,12 +27,12 @@ export async function createUser(user: User) {
       },
     });
     return newUser;
-    
-    
+
+
   } catch (e: any) {
     throw new Error("Error Register Error")
   }
-  
+
 }
 
 
