@@ -145,10 +145,8 @@ export async function storeImage(image: Express.Multer.File): Promise<string> {
 
 export async function deleteStoredImage(imagePath: string): Promise<void> {
   try {
-    // const fullPath = `$../../uploads/products/${imagePath}`;
     const fullPath = path.join(__dirname, `../../../${imagePath}`);
 
-    console.log("le chemin trou dcul: ", fullPath)
     await fs.unlink(fullPath, (err) => {
       if (err) throw Error("'Error deleting image")
       return;

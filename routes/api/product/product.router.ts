@@ -21,7 +21,7 @@ class ProductRouter {
     this.router.get('/', this.getAllProducts.bind(this));
     this.router.get('/:id', passport.authenticate('jwt', { session: false }), this.getProductById.bind(this));
     this.router.post('/', uploadManager.getMiddleware('image'), this.createProduct.bind(this));
-    this.router.post('/:id', this.updateProduct.bind(this));
+    this.router.patch('/:id', this.updateProduct.bind(this));
     this.router.post('/file/:id', uploadManager.getMiddleware('image'), this.updateProductImage.bind(this));
     this.router.delete('/:id', this.deleteProduct.bind(this));
   }
