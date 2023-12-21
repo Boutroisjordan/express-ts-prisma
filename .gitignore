@@ -8,4 +8,4 @@ node_modules
 #images
 ./uploads/*
 ./uploads/avatars
-./uploads/products
+./uploads/products/*
