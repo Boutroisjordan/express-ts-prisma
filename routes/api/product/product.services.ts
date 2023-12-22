@@ -41,7 +41,7 @@ export async function updateProduct(id: number, product: ProductDto): Promise<Pr
     });
 
     if (!existingProduct) {
-      throw new Error("Product not found");
+      throw new NotFoundError("Product");
     }
 
     if (typeof product.price == 'string') product.price = parseInt(product.price)

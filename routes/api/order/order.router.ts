@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import { authenticateAndAuthorize } from '../../../Utils/passport';
 import * as orderServices from './order.services';
 import { Prisma } from '@prisma/client';
+import { NotFoundError } from '../../errors/NotFoundErros';
 
 class OrderRouter {
   public router: express.Router;
@@ -41,8 +42,7 @@ class OrderRouter {
 
       res.status(201).json(order);
     } catch (error) {
-      console.error('Error creating order:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      next(error)
     }
   }
   private async getOrderById(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -69,7 +69,11 @@ class OrderRouter {
       const order = await orderServices.updateOrderProducts(orderId, productIds);
       res.status(200).json(order);
     } catch (error) {
-      next(error);
+      if (error instanceof NotFoundError) {
+        res.status(404).json({ error: error.message });
+      } else {
+        next(error);
+      }
     }
   }
 
@@ -81,7 +85,11 @@ class OrderRouter {
       const deletedOrder = await orderServices.deleteOrder(orderId);
       res.status(200).json(deletedOrder);
     } catch (error) {
-      next(error);
+      if (error instanceof NotFoundError) {
+        res.status(404).json({ error: error.message });
+      } else {
+        next(error);
+      }
     }
   }
 }

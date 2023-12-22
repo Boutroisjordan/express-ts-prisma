@@ -17,7 +17,9 @@ export async function findAllUsers(): Promise<Array<User>> {
 
 export async function createUser(user: UserDto) {
   try {
+    const alreadyExist = prisma.user.findUnique({ where: { email: user.email } });
 
+    if (alreadyExist != undefined) throw new Error("User email already taken")
     const hashedPassword = await encryptPassword(user.password);
     const newUser = await prisma.user.create({
       data: {

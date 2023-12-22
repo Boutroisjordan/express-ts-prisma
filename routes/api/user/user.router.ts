@@ -4,6 +4,7 @@ import * as userServices from './user.services';
 import { User } from '@prisma/client';
 import { authenticateAndAuthorize } from '../../../Utils/passport';
 import { UserDto } from '../../../dtos/user.dto';
+import { NotFoundError } from '../../errors/NotFoundErros';
 
 class UserRouter {
   public router: Router;
@@ -21,12 +22,12 @@ class UserRouter {
     this.router.delete('/:id', authenticateAndAuthorize(['ADMIN']), this.deleteUser.bind(this));
   }
 
-  private async getAllUsers(req: Request, res: Response): Promise<void> {
+  private async getAllUsers(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const users = await userServices.findAllUsers();
       res.status(200).json(users);
     } catch (error) {
-      res.status(500).send('Internal server error');
+      next(error)
     }
   }
 
@@ -37,7 +38,6 @@ class UserRouter {
       const result = await userServices.createUser(newUser);
       res.status(200).json(result);
     } catch (error) {
-      console.log(error)
       next(error);
     }
   }
@@ -51,7 +51,11 @@ class UserRouter {
       const result = await userServices.updateUser(userId, updatedUser);
       res.status(200).json(result);
     } catch (error) {
-      next(error);
+      if (error instanceof NotFoundError) {
+        res.status(404).json({ error: error.message });
+      } else {
+        next(error);
+      }
     }
   }
 
@@ -63,7 +67,11 @@ class UserRouter {
       const result = await userServices.deleteUser(userId);
       res.status(200).json(result);
     } catch (error) {
-      next(error);
+      if (error instanceof NotFoundError) {
+        res.status(404).json({ error: error.message });
+      } else {
+        next(error);
+      }
     }
   }
 

@@ -8,6 +8,7 @@ import { NotFoundError } from '../../errors/NotFoundErros';
 import uploadManager from '../../../Utils/UploadManager';
 import { productUpdateValidator, productValidator } from '../../../validators/product.validators';
 import { validationResult } from 'express-validator';
+
 class ProductRouter {
   public router: express.Router;
 
@@ -92,7 +93,11 @@ class ProductRouter {
       const result = await productServices.updateProduct(productId, updatedProduct)
       res.status(201).json(result);
     } catch (error) {
-      next(error);
+      if (error instanceof NotFoundError) {
+        res.status(404).json({ error: error.message });
+      } else {
+        next(error);
+      }
     }
   }
 
@@ -129,7 +134,11 @@ class ProductRouter {
       const deleteImg = productServices.deleteStoredImage(result.imagePath);
       res.status(201).json(result);
     } catch (error) {
-      next(error);
+      if (error instanceof NotFoundError) {
+        res.status(404).json({ error: error.message });
+      } else {
+        next(error);
+      }
     }
   }
 }
