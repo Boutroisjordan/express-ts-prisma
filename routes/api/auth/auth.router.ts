@@ -14,11 +14,13 @@ class AuthRouter {
   }
 
   private initializeRoutes(): void {
-    this.router.post('/login', authValidator, this.login.bind(this));
+    this.router.post('/login', this.login.bind(this));
+    // this.router.post('/login', authValidator, this.login.bind(this));
     this.router.post('/signup', authSignUpValidator, this.signup.bind(this));
   }
 
   private async login(req: Request, res: Response, next: NextFunction): Promise<void> {
+    console.log("triggger")
     try {
       const errors = validationResult(req);
 
@@ -33,6 +35,7 @@ class AuthRouter {
         .status(200)
         .json({ message: 'Logged in successfully', token: token });
     } catch (err: any) {
+      console.log("errrooor: ", err)
       next(err)
     }
   }

@@ -25,6 +25,7 @@ RUN npx prisma generate
 
 RUN npm run build
 
+RUN npx prisma migrate reset --force
 RUN npx prisma migrate deploy
 
 # Runs the dev npm script to build & start the server

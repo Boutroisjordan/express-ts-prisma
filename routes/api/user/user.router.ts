@@ -14,7 +14,8 @@ class UserRouter {
   }
 
   private initializeRoutes(): void {
-    this.router.get('/', authenticateAndAuthorize(['ADMIN']), this.getAllUsers.bind(this));
+    this.router.get('/', this.getAllUsers.bind(this));
+    // this.router.get('/', authenticateAndAuthorize(['ADMIN']), this.getAllUsers.bind(this));
     this.router.post('/', authenticateAndAuthorize(['ADMIN']), this.createUser.bind(this));
     this.router.patch('/:id', authenticateAndAuthorize(['ADMIN']), this.updateUser.bind(this));
     this.router.delete('/:id', authenticateAndAuthorize(['ADMIN']), this.deleteUser.bind(this));

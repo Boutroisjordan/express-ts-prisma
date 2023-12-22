@@ -14,7 +14,7 @@ export async function createAdmin() {
         username: 'admin',
         email: "admin@example.com",
         password: hashedPassword,
-
+        role: Role.ADMIN
       },
     });
   } catch (error) {
@@ -143,8 +143,7 @@ export async function createOrders() {
 
 export async function initData() {
   const prisma = new PrismaClient();
-  const admin = prisma.user.findFirst({ where: { email: "admin@example.com" } });
-
+  const admin = await prisma.user.findFirst({ where: { email: "admin@example.com" } });
 
 
   if (!admin) {

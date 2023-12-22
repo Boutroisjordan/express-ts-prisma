@@ -23,6 +23,7 @@ export async function login(email: string, password: string): Promise<Object> {
     const access_token = jwt.sign({ id: user.id, email: user.email, role: user.role }, SECRET, { expiresIn: "3 hours" })
     return access_token;
   } catch (err: any) {
+    console.log("error login: ", err)
     throw new Error("Bad Credentials")
   }
 }
