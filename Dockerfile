@@ -25,7 +25,6 @@
 # # CMD ["dumb-init", "node", "dist/src/main", ]
 # CMD ["npm", "run", "start:migrate:prod"]
 
-[08:19] BILLIS ENZO (Guest)
 # Installs Node.js image
 FROM node:20
 
