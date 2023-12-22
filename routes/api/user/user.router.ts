@@ -31,13 +31,14 @@ class UserRouter {
   }
 
 
-  private async createUser(req: Request, res: Response): Promise<void> {
+  private async createUser(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const newUser: User = req.body;
       const result = await userServices.createUser(newUser);
       res.status(200).json(result);
     } catch (error) {
-      res.status(500).send('Internal server error');
+      console.log(error)
+      next(error);
     }
   }
 

@@ -35,7 +35,6 @@ export async function createUser(user: UserDto) {
 
 }
 
-// user.services.ts
 
 export async function updateUser(userId: number, updatedUser: UserDto): Promise<User> {
   try {
