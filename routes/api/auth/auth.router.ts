@@ -1,4 +1,4 @@
-import express, { Router, Request, Response } from 'express';
+import express, { Router, Request, Response, NextFunction } from 'express';
 import * as authServices from './auth.services';
 import { UserSignUpDto } from '../../../dtos/user.dto';
 import { validationResult } from 'express-validator';
@@ -18,7 +18,7 @@ class AuthRouter {
     this.router.post('/signup', userValidator, this.signup.bind(this));
   }
 
-  private async login(req: Request, res: Response): Promise<void> {
+  private async login(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const errors = validationResult(req);
 
@@ -29,15 +29,11 @@ class AuthRouter {
       const { email, password } = req.body;
       const token = await authServices.login(email, password);
 
-      if (!token) {
-        throw new Error();
-      }
-
       res
         .status(200)
         .json({ message: 'Logged in successfully', token: token });
     } catch (err: any) {
-      res.status(401).send('Bad credentials');
+      next(err)
     }
   }
 

@@ -8,12 +8,12 @@ import encryptPassword from "../../../Utils/encryptPassword";
 const SECRET:string = process.env.JWT_SECRET || 'mysecrettoken';
 
 export async function login(email: string, password: string): Promise<Object> {
-  let loginSucceed = false;
+
   try{
-    const user = await prisma.user.findFirstOrThrow({where: {email: email}});
+    const user = await prisma.user.findUnique({ where: { email: email } });
 
     if(!user) {
-      throw new Error("Bad credentials")
+      throw new Error("No user found")
     } 
 
     const isValid = await bcrypt.compare(password, user?.password)
@@ -22,8 +22,7 @@ export async function login(email: string, password: string): Promise<Object> {
     } 
     const access_token = jwt.sign({ id: user.id, email: user.email, role: user.role }, SECRET, { expiresIn: "3 hours" })
     return access_token;
-  } catch(err: any) {
-    loginSucceed = false;
+  } catch (err: any) {
     throw new Error("Bad Credentials")
   }
 }
