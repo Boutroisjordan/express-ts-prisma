@@ -138,7 +138,7 @@ export async function storeImage(image: Express.Multer.File): Promise<string> {
 
     return filePath;
   } catch (error) {
-    console.log("image error ?")
+    console.log("image error ? ")
     throw new Error('Failed to store the image');
   }
 }
@@ -147,10 +147,9 @@ export async function deleteStoredImage(imagePath: string): Promise<void> {
   try {
     const fullPath = path.join(__dirname, `../../../${imagePath}`);
 
-    await fs.unlink(fullPath, (err) => {
-      if (err) throw Error("'Error deleting image")
-      return;
-    });
+    if (fs.existsSync(fullPath)) {
+      fs.unlinkSync(fullPath);
+    }
 
   } catch (error) {
     throw new Error('Error deleting image');
