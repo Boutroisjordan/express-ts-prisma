@@ -38,9 +38,6 @@ COPY package*.json ./
 # generated prisma files
 COPY prisma ./prisma/
 
-# # COPY ENV variable
-# COPY .env ./
-
 # COPY tsconfig.json file
 COPY tsconfig.json ./
 
@@ -49,6 +46,8 @@ COPY . .
 
 # Installs all packages
 RUN npm install
+
+# Run Prisma generate after copying necessary files
 RUN npx prisma generate
 
 RUN npm run build
