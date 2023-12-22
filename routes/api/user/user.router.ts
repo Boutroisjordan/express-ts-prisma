@@ -2,7 +2,8 @@ import express, { Router, Response, Request, NextFunction } from 'express';
 import prisma from '../../../prisma';
 import * as userServices from './user.services';
 import { User } from '@prisma/client';
-import passport from '../../../Utils/passport';
+import { authenticateAndAuthorize } from '../../../Utils/passport';
+import { UserDto } from '../../../dtos/user.dto';
 
 class UserRouter {
   public router: Router;
@@ -13,11 +14,10 @@ class UserRouter {
   }
 
   private initializeRoutes(): void {
-    this.router.get('/', this.getAllUsers.bind(this));
-    this.router.get('/me', passport.authenticate('jwt', { session: false }), this.getMe.bind(this));
-    this.router.post('/', this.createUser.bind(this));
-    this.router.post('/:id', this.updateUser.bind(this));
-    this.router.delete('/:id', this.deleteUser.bind(this));
+    this.router.get('/', authenticateAndAuthorize(['ADMIN']), this.getAllUsers.bind(this));
+    this.router.post('/', authenticateAndAuthorize(['ADMIN']), this.createUser.bind(this));
+    this.router.post('/:id', authenticateAndAuthorize(['ADMIN']), this.updateUser.bind(this));
+    this.router.delete('/:id', authenticateAndAuthorize(['ADMIN']), this.deleteUser.bind(this));
   }
 
   private async getAllUsers(req: Request, res: Response): Promise<void> {
@@ -29,13 +29,6 @@ class UserRouter {
     }
   }
 
-  private async getMe(req: Request, res: Response): Promise<void> {
-    try {
-      res.status(200).send('Hello');
-    } catch (error) {
-      // Gestion des erreurs
-    }
-  }
 
   private async createUser(req: Request, res: Response): Promise<void> {
     try {
@@ -47,13 +40,31 @@ class UserRouter {
     }
   }
 
-  private updateUser(req: Request, res: Response): void {
-    // Implementation de la mise à jour
+  private async updateUser(req: Request, res: Response, next: NextFunction): Promise<void> {
+    const updatedUser: UserDto = req.body;
+    const { id } = req.params;
+    const userId: number = parseInt(id);
+
+    try {
+      const result = await userServices.updateUser(userId, updatedUser);
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
   }
 
-  private deleteUser(req: Request, res: Response): void {
-    // Implementation de la suppression
+  private async deleteUser(req: Request, res: Response, next: NextFunction): Promise<void> {
+    const { id } = req.params;
+    const userId: number = parseInt(id);
+
+    try {
+      const result = await userServices.deleteUser(userId);
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
   }
+
 }
 
 const userRouter = new UserRouter().router;

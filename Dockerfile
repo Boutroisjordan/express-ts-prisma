@@ -3,8 +3,8 @@ FROM node:18 as build
 WORKDIR /usr/src/app
 COPY package.json .
 
-RUN npm install
 COPY . .
+RUN npm install
 
 COPY /prisma ./prisma
 RUN npx prisma generate
@@ -20,7 +20,6 @@ COPY --from=build /usr/src/app/prisma ./prisma
 
 RUN npm install --omit=dev
 
-# COPY --from=build /usr/src/app/node_modules/.prisma/client  ./node_modules/.prisma/client
 ENV NODE_ENV production
 EXPOSE 3000
 # CMD ["dumb-init", "node", "dist/src/main", ]

@@ -1,5 +1,9 @@
 import express, { Router, Request, Response } from 'express';
 import * as authServices from './auth.services';
+import { UserSignUpDto } from '../../../dtos/user.dto';
+import { validationResult } from 'express-validator';
+import { authValidator } from '../../../validators/auth.validator';
+import { userValidator } from '../../../validators/user.validator';
 
 class AuthRouter {
   public router: Router;
@@ -10,18 +14,18 @@ class AuthRouter {
   }
 
   private initializeRoutes(): void {
-    this.router.get('/:id', this.getById.bind(this));
-    this.router.post('/login', this.login.bind(this));
-    this.router.post('/:id', this.updateById.bind(this));
-    this.router.delete('/:id', this.deleteById.bind(this));
-  }
-
-  private async getById(req: Request, res: Response): Promise<void> {
-    // Implémentation de la récupération par ID
+    this.router.post('/login', authValidator, this.login.bind(this));
+    this.router.post('/signup', userValidator, this.signup.bind(this));
   }
 
   private async login(req: Request, res: Response): Promise<void> {
     try {
+      const errors = validationResult(req);
+
+      if (!errors.isEmpty()) {
+        res.status(400).json({ errors: errors.array() });
+      }
+
       const { email, password } = req.body;
       const token = await authServices.login(email, password);
 
@@ -30,24 +34,37 @@ class AuthRouter {
       }
 
       res
-        .cookie('token', token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-        })
         .status(200)
-        .json({ message: 'Logged in successfully' });
+        .json({ message: 'Logged in successfully', token: token });
     } catch (err: any) {
       res.status(401).send('Bad credentials');
     }
   }
 
-  private async updateById(req: Request, res: Response): Promise<void> {
-    // Implémentation de la mise à jour par ID
+  private async signup(req: Request, res: Response): Promise<void> {
+    try {
+      const errors = validationResult(req);
+
+      if (!errors.isEmpty()) {
+        res.status(400).json({ errors: errors.array() });
+      }
+      const newUser: UserSignUpDto = req.body;
+      const result = await authServices.signup(newUser);
+
+      if (!result) {
+        throw new Error();
+      }
+
+      res
+        .status(201)
+        .json({ message: "successfully signUp", user: result });
+
+    } catch (err: any) {
+      res.status(401).send('Bad credentials');
+    }
   }
 
-  private async deleteById(req: Request, res: Response): Promise<void> {
-    // Implémentation de la suppression par ID
-  }
+
 }
 
 const authRouter = new AuthRouter().router;

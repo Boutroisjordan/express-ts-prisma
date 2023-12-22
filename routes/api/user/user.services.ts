@@ -1,7 +1,8 @@
 import bcrypt from "bcrypt";
 import prisma from "../../../prisma"
-import { User } from "@prisma/client";
+import { Role, User } from "@prisma/client";
 import encryptPassword from "../../../Utils/encryptPassword";
+import { UserDto } from "../../../dtos/user.dto";
 
 
 export async function findAllUsers(): Promise<Array<User>> {
@@ -14,25 +15,64 @@ export async function findAllUsers(): Promise<Array<User>> {
 }
 
 
-export async function createUser(user: User) {
+export async function createUser(user: UserDto) {
   try {
-    const { username, email, password } = user;
 
-    const hashedPassword = await encryptPassword(password);
+    const hashedPassword = await encryptPassword(user.password);
     const newUser = await prisma.user.create({
       data: {
-        username,
-        email,
+        ...user,
         password: hashedPassword,
+        role: user.role as Role
       },
     });
-    return newUser;
 
+    return newUser;
 
   } catch (e: any) {
     throw new Error("Error Register Error")
   }
 
 }
+
+// user.services.ts
+
+export async function updateUser(userId: number, updatedUser: UserDto): Promise<User> {
+  try {
+    const existingUser = await prisma.user.findUnique({ where: { id: userId } });
+
+    if (!existingUser) {
+      throw new Error("User not found");
+    }
+
+    const hashedPassword = await encryptPassword(updatedUser.password);
+    const updatedUserData = {
+      ...updatedUser,
+      password: hashedPassword,
+    };
+
+    const updatedUserRecord = await prisma.user.update({
+      where: { id: userId },
+      data: updatedUserData,
+    });
+
+    return updatedUserRecord;
+  } catch (error) {
+    throw new Error('Error updating user');
+  }
+}
+
+export async function deleteUser(userId: number): Promise<User> {
+  try {
+    const deletedUser = await prisma.user.delete({
+      where: { id: userId },
+    });
+
+    return deletedUser;
+  } catch (error) {
+    throw new Error('Error deleting user');
+  }
+}
+
 
 

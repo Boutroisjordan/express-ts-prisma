@@ -2,13 +2,12 @@ import express, { Request, Response, NextFunction } from 'express';
 import prisma from '../../../prisma';
 import * as productServices from './product.services';
 import { ProductDto } from '../../../dtos/product.dto';
-import passport from '../../../Utils/passport';
+import { authenticateAndAuthorize } from '../../../Utils/passport';
 import { Product } from '@prisma/client';
 import { NotFoundError } from '../../errors/NotFoundErros';
-import multer, { Multer } from 'multer';
-import { validationResult } from 'express-validator';
 import uploadManager from '../../../Utils/UploadManager';
-
+import { productUpdateValidator, productValidator } from '../../../validators/product.validators';
+import { validationResult } from 'express-validator';
 class ProductRouter {
   public router: express.Router;
 
@@ -18,12 +17,12 @@ class ProductRouter {
   }
 
   private initializeRoutes(): void {
-    this.router.get('/', this.getAllProducts.bind(this));
-    this.router.get('/:id', passport.authenticate('jwt', { session: false }), this.getProductById.bind(this));
-    this.router.post('/', uploadManager.getMiddleware('image'), this.createProduct.bind(this));
-    this.router.patch('/:id', this.updateProduct.bind(this));
-    this.router.post('/file/:id', uploadManager.getMiddleware('image'), this.updateProductImage.bind(this));
-    this.router.delete('/:id', this.deleteProduct.bind(this));
+    this.router.get('/', authenticateAndAuthorize(['ADMIN', 'GESTIONNAIRE', "CLIENT"]), this.getAllProducts.bind(this));
+    this.router.get('/:id', authenticateAndAuthorize(['ADMIN', 'GESTIONNAIRE']), this.getProductById.bind(this));
+    this.router.post('/', uploadManager.getMiddleware('image'), authenticateAndAuthorize(['ADMIN', 'GESTIONNAIRE']), productValidator, this.createProduct.bind(this));
+    this.router.post('/file/:id', authenticateAndAuthorize(["ADMIN", "GESTIONNAIRE"]), uploadManager.getMiddleware('image'), this.updateProductImage.bind(this));
+    this.router.patch('/:id', authenticateAndAuthorize(["ADMIN", "GESTIONNAIRE"]), productUpdateValidator, this.updateProduct.bind(this));
+    this.router.delete('/:id', authenticateAndAuthorize(["ADMIN", "GESTIONNAIRE"]), this.deleteProduct.bind(this));
   }
 
   private async getAllProducts(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -41,8 +40,9 @@ class ProductRouter {
 
   private async getProductById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { id } = req.body;
-      const product: Product = await productServices.findById(id);
+      const { id } = req.params;
+      const prodcutId = parseInt(id)
+      const product: Product = await productServices.findById(prodcutId);
       res.status(200).json(product);
     } catch (error) {
       if (error instanceof NotFoundError) {
@@ -55,6 +55,12 @@ class ProductRouter {
 
   private async createProduct(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const errors = validationResult(req);
+
+      if (!errors.isEmpty()) {
+        res.status(400).json({ errors: errors.array() });
+      }
+
       const newProduct: ProductDto = req.body;
       const image: Express.Multer.File | undefined = req.file;
       if (image && newProduct) {
@@ -72,6 +78,12 @@ class ProductRouter {
 
   private async updateProduct(req: Request, res: Response, next: NextFunction): Promise<void> {
 
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      res.status(400).json({ errors: errors.array() });
+    }
+
     const updatedProduct: ProductDto = req.body;
     const { id } = req.params;
     const productId: number = parseInt(id)
@@ -86,6 +98,11 @@ class ProductRouter {
 
   private async updateProductImage(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const errors = validationResult(req);
+
+      if (!errors.isEmpty()) {
+        res.status(400).json({ errors: errors.array() });
+      }
       const { id } = req.params;
       const productId: number = parseInt(id);
       const image: Express.Multer.File | undefined = req.file;

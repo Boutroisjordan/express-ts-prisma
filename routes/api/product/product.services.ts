@@ -35,12 +35,10 @@ export async function createProduct(product: ProductDto, imagePath: string): Pro
 
 }
 export async function updateProduct(id: number, product: ProductDto): Promise<Product> {
-
   try {
     const existingProduct = await prisma.product.findUnique({
       where: { id },
     });
-
 
     if (!existingProduct) {
       throw new Error("Product not found");
@@ -69,11 +67,9 @@ export async function updateProductImage(id: number, imagePath: string): Promise
       where: { id },
     });
 
-
     if (!existingProduct) {
       throw new Error("Product not found");
     }
-
 
     const updatedProduct = await prisma.product.update({
       where: { id },
@@ -92,15 +88,20 @@ export async function updateProductImage(id: number, imagePath: string): Promise
 
 export async function findById(id: number): Promise<Product> {
   try {
+
     const product = await prisma.product.findUnique({
       where: {
         id: id
       }
     })
+
+
+
     if (!product) throw new NotFoundError('Product')
 
     return product;
   } catch (error) {
+    console.log("error mon gros: ", error)
     throw new Error('Internal server error');
   }
 }
@@ -113,8 +114,6 @@ export async function deleteById(id: number): Promise<Product> {
     if (!product) throw new NotFoundError("Product not found");
 
     const deletedProduct = prisma.product.delete({ where: { id } });
-
-    //Delete img
 
     return deletedProduct
   } catch (error) {
@@ -138,7 +137,6 @@ export async function storeImage(image: Express.Multer.File): Promise<string> {
 
     return filePath;
   } catch (error) {
-    console.error("Image error service store: ", error);
     throw new Error('Failed to store the image');
   }
 }
