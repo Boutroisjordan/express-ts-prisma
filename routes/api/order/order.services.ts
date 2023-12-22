@@ -1,9 +1,7 @@
-// order.services.ts
 import { Prisma, Order, User } from '@prisma/client';
 import prisma from '../../../prisma';
-import { NotFoundError } from '../../errors/NotFoundErros';
+import { NotFoundError } from '../../errors/NotFoundError';
 
-// Dans le service Order
 
 export async function createOrder(userId: number, productIds: number[]): Promise<Order> {
   try {
@@ -37,10 +35,10 @@ export async function createOrder(userId: number, productIds: number[]): Promise
 
     return order;
   } catch (error) {
+    if (error instanceof NotFoundError) throw new NotFoundError(error.message)
     throw new Error('Failed to create order');
   }
 }
-
 
 
 export async function getAllOrder() {
@@ -70,8 +68,11 @@ export async function getOrderById(orderId: number): Promise<Order | null> {
       },
     });
 
+    if (!order) throw new NotFoundError("Order")
+
     return order;
-  } catch (error) {
+  } catch (error: any) {
+    if (error instanceof NotFoundError) throw new NotFoundError(error.message)
     throw new Error('Error fetching order by ID');
   }
 }
@@ -121,7 +122,6 @@ export async function updateOrderProducts(orderId: number, productIds: number[])
 
     return order;
   } catch (error) {
-    console.log("plus precis stp: ", error)
     throw new Error('Failed to update order products');
   }
 }
@@ -146,6 +146,7 @@ export async function deleteOrder(orderId: number): Promise<Order> {
 
     return deletedOrder;
   } catch (error) {
+    if (error instanceof NotFoundError) throw new NotFoundError("Order")
     throw new Error('Error deleting order');
   }
 }
@@ -156,11 +157,10 @@ async function validateUserId(userId: number): Promise<void> {
   });
 
   if (!user) {
-    throw new Error('User not found');
+    throw new NotFoundError('User');
   }
 }
 
-// Function to check if all productIds exist
 async function validateProductIds(productIds: number[]): Promise<void> {
   const products = await prisma.product.findMany({
     where: {
@@ -171,7 +171,7 @@ async function validateProductIds(productIds: number[]): Promise<void> {
   });
 
   if (products.length !== productIds.length) {
-    throw new Error('One or more products not found');
+    throw new NotFoundError('One or more products not found');
   }
 }
 

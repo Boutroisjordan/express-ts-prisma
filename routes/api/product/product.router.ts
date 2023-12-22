@@ -4,10 +4,11 @@ import * as productServices from './product.services';
 import { ProductDto } from '../../../dtos/product.dto';
 import { authenticateAndAuthorize } from '../../../Utils/passport';
 import { Product } from '@prisma/client';
-import { NotFoundError } from '../../errors/NotFoundErros';
+import { NotFoundError } from '../../errors/NotFoundError';
 import uploadManager from '../../../Utils/UploadManager';
 import { productUpdateValidator, productValidator } from '../../../validators/product.validators';
 import { validationResult } from 'express-validator';
+import { BadRequestError } from '../../errors/BadRequestError';
 
 class ProductRouter {
   public router: express.Router;
@@ -31,12 +32,9 @@ class ProductRouter {
       const products: Array<Product> = await productServices.findAll();
       res.status(200).json(products);
     } catch (error) {
-      if (error instanceof NotFoundError) {
-        res.status(404).json({ error: error.message });
-      } else {
-        next(error);
-      }
+      next(error);
     }
+    return;
   }
 
   private async getProductById(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -46,12 +44,9 @@ class ProductRouter {
       const product: Product = await productServices.findById(prodcutId);
       res.status(200).json(product);
     } catch (error) {
-      if (error instanceof NotFoundError) {
-        res.status(404).json({ error: error.message });
-      } else {
         next(error);
-      }
     }
+    return;
   }
 
   private async createProduct(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -65,7 +60,7 @@ class ProductRouter {
 
       const newProduct: ProductDto = req.body;
       if (!req.file) {
-        res.status(400).json({ message: "Bad Request: no file for product" });
+        throw new BadRequestError("File")
         return; // Terminer la fonction ici après l'envoi de la réponse.
       }
 
@@ -76,9 +71,9 @@ class ProductRouter {
         res.status(201).json(result);
 
     } catch (error) {
-      console.log("Image creation error: ", error)
       next(error);
     }
+    return;
   }
 
   private async updateProduct(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -97,12 +92,9 @@ class ProductRouter {
       const result = await productServices.updateProduct(productId, updatedProduct)
       res.status(201).json(result);
     } catch (error) {
-      if (error instanceof NotFoundError) {
-        res.status(404).json({ error: error.message });
-      } else {
-        next(error);
-      }
+      next(error);
     }
+    return;
   }
 
   private async updateProductImage(req: Request, res: Response, next: NextFunction): Promise<void> {

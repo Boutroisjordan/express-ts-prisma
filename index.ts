@@ -7,6 +7,10 @@ import path from 'path';
 import fs from "fs"
 import { initData } from './InitData';
 import cors from "cors"
+import { AlreadyTakenError } from './routes/errors/AlreadyTakenError';
+import { NotFoundError } from './routes/errors/NotFoundError';
+import { BadCrendentialsError } from './routes/errors/BadCredentialsError';
+import { BadRequestError } from './routes/errors/BadRequestError';
 
 
 async function main() {
@@ -32,7 +36,24 @@ async function main() {
   // Middleware d'erreur global
   app.use((err: Error, req: Request, res: Response, next: NextFunction): void => {
     console.error(err);
-    res.status(500).json({ error: 'Internal server error' });
+    if (err instanceof AlreadyTakenError) {
+      res.status(409).json({ message: err.message });
+      return;
+    }
+    if (err instanceof NotFoundError) {
+      res.status(404).json({ message: err.message });
+      return;
+    }
+    if (err instanceof BadCrendentialsError) {
+      res.status(401).json({ message: err.message });
+      return;
+    }
+    if (err instanceof BadRequestError) {
+      res.status(400).json({ message: err.message });
+      return;
+    }
+
+    res.status(500).json({ message: 'Internal server error' });
   });
 
   app.get('/', (req: Request, res: Response) => {

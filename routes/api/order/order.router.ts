@@ -2,7 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import { authenticateAndAuthorize } from '../../../Utils/passport';
 import * as orderServices from './order.services';
 import { Prisma } from '@prisma/client';
-import { NotFoundError } from '../../errors/NotFoundErros';
+import { NotFoundError } from '../../errors/NotFoundError';
 
 class OrderRouter {
   public router: express.Router;
@@ -22,9 +22,7 @@ class OrderRouter {
 
   private async getAllOrder(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-
       const order = await orderServices.getAllOrder();
-
       res.status(201).json(order);
     } catch (error) {
       next(error);
@@ -44,22 +42,18 @@ class OrderRouter {
     } catch (error) {
       next(error)
     }
+    return;
   }
   private async getOrderById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const orderId = parseInt(req.params.id, 10);
       const order = await orderServices.getOrderById(orderId);
-
-      if (order) {
-        res.status(200).json(order);
-      } else {
-        res.status(404).json({ error: 'Order not found' });
-      }
+      res.status(200).json(order);
     } catch (error) {
       next(error);
     }
+    return;
   }
-
 
   private async updateOrder(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
@@ -69,12 +63,9 @@ class OrderRouter {
       const order = await orderServices.updateOrderProducts(orderId, productIds);
       res.status(200).json(order);
     } catch (error) {
-      if (error instanceof NotFoundError) {
-        res.status(404).json({ error: error.message });
-      } else {
-        next(error);
-      }
+      next(error);
     }
+    return;
   }
 
 
@@ -85,12 +76,9 @@ class OrderRouter {
       const deletedOrder = await orderServices.deleteOrder(orderId);
       res.status(200).json(deletedOrder);
     } catch (error) {
-      if (error instanceof NotFoundError) {
-        res.status(404).json({ error: error.message });
-      } else {
-        next(error);
-      }
+      next(error);
     }
+    return;
   }
 }
 

@@ -1,7 +1,7 @@
 import prisma from "../../../prisma"
 import { Product, User } from "@prisma/client";
 import { ProductDto } from "../../../dtos/product.dto";
-import { NotFoundError } from "../../errors/NotFoundErros";
+import { NotFoundError } from "../../errors/NotFoundError";
 import path from "path";
 import fs from "fs"
 
@@ -14,6 +14,7 @@ export async function findAll(): Promise<Array<Product>> {
 
     return products;
   } catch (e: any) {
+    if (e instanceof NotFoundError) throw new NotFoundError(e.message)
     throw new Error('Internal server error');
   }
 }
@@ -30,8 +31,6 @@ export async function createProduct(product: ProductDto, imagePath: string): Pro
     return newProduct;
 
   } catch (e: any) {
-    console.log("product error ?")
-
     throw new Error('Internal server error');
   }
 
@@ -57,6 +56,7 @@ export async function updateProduct(id: number, product: ProductDto): Promise<Pr
     return updatedProduct;
 
   } catch (e: any) {
+    if (e instanceof NotFoundError) throw new NotFoundError(e.message)
     throw new Error('Internal server error');
   }
 
@@ -70,7 +70,7 @@ export async function updateProductImage(id: number, imagePath: string): Promise
     });
 
     if (!existingProduct) {
-      throw new Error("Product not found");
+      throw new NotFoundError("Product");
     }
 
     const updatedProduct = await prisma.product.update({
@@ -83,6 +83,7 @@ export async function updateProductImage(id: number, imagePath: string): Promise
     return updatedProduct;
 
   } catch (e: any) {
+    if (e instanceof NotFoundError) throw new NotFoundError(e.message)
     throw new Error('Internal server error');
   }
 
@@ -102,7 +103,7 @@ export async function findById(id: number): Promise<Product> {
 
     return product;
   } catch (error) {
-    console.log("error mon gros: ", error)
+    if (error instanceof NotFoundError) throw new NotFoundError(error.message)
     throw new Error('Internal server error');
   }
 }
@@ -112,12 +113,13 @@ export async function deleteById(id: number): Promise<Product> {
   try {
     const product = prisma.product.findUnique({ where: { id } })
 
-    if (!product) throw new NotFoundError("Product not found");
+    if (!product) throw new NotFoundError("Product");
 
     const deletedProduct = prisma.product.delete({ where: { id } });
 
     return deletedProduct
   } catch (error) {
+    if (error instanceof NotFoundError) throw new NotFoundError(error.message)
     throw new Error('Internal server error');
   }
 }
@@ -138,7 +140,6 @@ export async function storeImage(image: Express.Multer.File): Promise<string> {
 
     return filePath;
   } catch (error) {
-    console.log("image error ? ")
     throw new Error('Failed to store the image');
   }
 }

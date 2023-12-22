@@ -7,7 +7,7 @@ class UploadManager {
     storage: this.storage,
     fileFilter: this.fileFilter.bind(this),
     limits: {
-      fileSize: 5 * 1024 * 1024, // 5MB max size
+      fileSize: 5 * 1024 * 1024, // 5MB 
     },
   });
 
@@ -20,7 +20,6 @@ class UploadManager {
     if (allowedMimes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      // cb(new Error('Invalid file type. Only JPEG and PNG are allowed.'));
       cb(new MulterError('LIMIT_UNEXPECTED_FILE', 'Invalid file type. Only JPEG and PNG are allowed.'));
     }
   }
