@@ -5,12 +5,15 @@ import cookieParser from 'cookie-parser';
 import prisma from './prisma';
 import path from 'path';
 import fs from "fs"
+import { initData } from './InitData';
 
 
 async function main() {
 
   const app: Application = express();
   const port = process.env.PORT || 3000;
+
+
 
   //Créer le dossier 
   if (!fs.existsSync("./uploads/products")) {
@@ -36,6 +39,8 @@ async function main() {
   app.listen(port, () => {
     console.log(`Server is Fire at http://localhost:${port}`);
   });
+
+  await initData();
 }
 
 main()
