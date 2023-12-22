@@ -7,7 +7,8 @@ import { NotFoundError } from '../../errors/NotFoundErros';
 
 export async function createOrder(userId: number, productIds: number[]): Promise<Order> {
   try {
-    // Récupérer les produits associés aux IDs fournis
+    await validateUserId(userId);
+    await validateProductIds(productIds);
     const products = await prisma.product.findMany({
       where: {
         id: {
@@ -16,10 +17,10 @@ export async function createOrder(userId: number, productIds: number[]): Promise
       },
     });
 
-    // Calculer le totalAmount en fonction des prix des produits
+
     const totalAmount = products.reduce((total, product) => total + product.price, 0);
 
-    // Créer la commande
+
     const order = await prisma.order.create({
       data: {
         userId,
@@ -77,6 +78,8 @@ export async function getOrderById(orderId: number): Promise<Order | null> {
 
 export async function updateOrder(orderId: number, updatedOrderData: Prisma.OrderUpdateInput): Promise<Order> {
   try {
+
+
     const updatedOrder = await prisma.order.update({
       where: {
         id: orderId,
@@ -93,7 +96,6 @@ export async function updateOrder(orderId: number, updatedOrderData: Prisma.Orde
   }
 }
 
-// order.services.ts
 
 export async function updateOrderProducts(orderId: number, productIds: number[]): Promise<Order | null> {
   try {
@@ -102,6 +104,8 @@ export async function updateOrderProducts(orderId: number, productIds: number[])
     if (!existingOrder) {
       throw new NotFoundError("Order not found");
     }
+    await validateProductIds(productIds);
+
 
     const order = await prisma.order.update({
       where: { id: orderId },
@@ -125,6 +129,12 @@ export async function updateOrderProducts(orderId: number, productIds: number[])
 
 export async function deleteOrder(orderId: number): Promise<Order> {
   try {
+    const existingOrder = await prisma.order.findUnique({ where: { id: orderId } });
+
+    if (!existingOrder) {
+      throw new NotFoundError("Order not found");
+    }
+
     const deletedOrder = await prisma.order.delete({
       where: {
         id: orderId,
@@ -137,6 +147,31 @@ export async function deleteOrder(orderId: number): Promise<Order> {
     return deletedOrder;
   } catch (error) {
     throw new Error('Error deleting order');
+  }
+}
+
+async function validateUserId(userId: number): Promise<void> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  });
+
+  if (!user) {
+    throw new Error('User not found');
+  }
+}
+
+// Function to check if all productIds exist
+async function validateProductIds(productIds: number[]): Promise<void> {
+  const products = await prisma.product.findMany({
+    where: {
+      id: {
+        in: productIds,
+      },
+    },
+  });
+
+  if (products.length !== productIds.length) {
+    throw new Error('One or more products not found');
   }
 }
 
