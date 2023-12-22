@@ -6,6 +6,7 @@ import prisma from './prisma';
 import path from 'path';
 import fs from "fs"
 import { initData } from './InitData';
+import cors from "cors"
 
 
 async function main() {
@@ -20,6 +21,8 @@ async function main() {
     fs.mkdirSync("./uploads/products", { recursive: true });
   }
 
+
+  app.use(cors({ origin: "*" }))
   app.use(express.json())
   app.use(cookieParser())
   app.use("/uploads/products", express.static("./uploads/products"));
