@@ -30,6 +30,8 @@ export async function createProduct(product: ProductDto, imagePath: string): Pro
     return newProduct;
 
   } catch (e: any) {
+    console.log("product error ?")
+
     throw new Error('Internal server error');
   }
 
@@ -96,7 +98,6 @@ export async function findById(id: number): Promise<Product> {
     })
 
 
-
     if (!product) throw new NotFoundError('Product')
 
     return product;
@@ -137,6 +138,7 @@ export async function storeImage(image: Express.Multer.File): Promise<string> {
 
     return filePath;
   } catch (error) {
+    console.log("image error ?")
     throw new Error('Failed to store the image');
   }
 }

@@ -20,7 +20,7 @@ class ProductRouter {
   private initializeRoutes(): void {
     this.router.get('/', authenticateAndAuthorize(['ADMIN', 'GESTIONNAIRE', "CLIENT"]), this.getAllProducts.bind(this));
     this.router.get('/:id', authenticateAndAuthorize(['ADMIN', 'GESTIONNAIRE']), this.getProductById.bind(this));
-    this.router.post('/', uploadManager.getMiddleware('image'), authenticateAndAuthorize(['ADMIN', 'GESTIONNAIRE']), productValidator, this.createProduct.bind(this));
+    this.router.post('/', authenticateAndAuthorize(['ADMIN', 'GESTIONNAIRE']), uploadManager.getMiddleware('image'), productValidator, this.createProduct.bind(this));
     this.router.post('/file/:id', authenticateAndAuthorize(["ADMIN", "GESTIONNAIRE"]), uploadManager.getMiddleware('image'), this.updateProductImage.bind(this));
     this.router.patch('/:id', authenticateAndAuthorize(["ADMIN", "GESTIONNAIRE"]), productUpdateValidator, this.updateProduct.bind(this));
     this.router.delete('/:id', authenticateAndAuthorize(["ADMIN", "GESTIONNAIRE"]), this.deleteProduct.bind(this));
@@ -60,17 +60,21 @@ class ProductRouter {
 
       if (!errors.isEmpty()) {
         res.status(400).json({ errors: errors.array() });
+        return;
       }
 
       const newProduct: ProductDto = req.body;
-      const image: Express.Multer.File | undefined = req.file;
-      if (image && newProduct) {
+      if (!req.file) {
+        res.status(400).json({ message: "Bad Request: no file for product" });
+        return; // Terminer la fonction ici après l'envoi de la réponse.
+      }
+
+      const image: Express.Multer.File = req.file;
+
         const imagePath = await productServices.storeImage(image);
         const result = await productServices.createProduct(newProduct, imagePath);
         res.status(201).json(result);
-      } else {
-        throw new Error('Invalid product or image');
-      }
+
     } catch (error) {
       console.log("Image creation error: ", error)
       next(error);

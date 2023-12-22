@@ -20,7 +20,8 @@ class UploadManager {
     if (allowedMimes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Invalid file type. Only JPEG and PNG are allowed.'));
+      // cb(new Error('Invalid file type. Only JPEG and PNG are allowed.'));
+      cb(new MulterError('LIMIT_UNEXPECTED_FILE', 'Invalid file type. Only JPEG and PNG are allowed.'));
     }
   }
 }
