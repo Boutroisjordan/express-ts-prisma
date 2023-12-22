@@ -2,7 +2,7 @@ import express, { Router, Request, Response, NextFunction } from 'express';
 import * as authServices from './auth.services';
 import { UserSignUpDto } from '../../../dtos/user.dto';
 import { validationResult } from 'express-validator';
-import { authValidator } from '../../../validators/auth.validator';
+import { authSignUpValidator, authValidator } from '../../../validators/auth.validator';
 import { userValidator } from '../../../validators/user.validator';
 
 class AuthRouter {
@@ -15,7 +15,7 @@ class AuthRouter {
 
   private initializeRoutes(): void {
     this.router.post('/login', authValidator, this.login.bind(this));
-    this.router.post('/signup', userValidator, this.signup.bind(this));
+    this.router.post('/signup', authSignUpValidator, this.signup.bind(this));
   }
 
   private async login(req: Request, res: Response, next: NextFunction): Promise<void> {
