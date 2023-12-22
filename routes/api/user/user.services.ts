@@ -28,7 +28,6 @@ export async function createUser(user: UserDto) {
     });
 
     return newUser;
-
   } catch (e: any) {
     throw new Error("Error Register Error")
   }
