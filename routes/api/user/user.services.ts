@@ -46,15 +46,16 @@ export async function updateUser(userId: number, updatedUser: UserDto): Promise<
       throw new Error("User not found");
     }
 
-    const hashedPassword = await encryptPassword(updatedUser.password);
-    const updatedUserData = {
-      ...updatedUser,
-      password: hashedPassword,
-    };
+    if (updatedUser.password) {
+      const hashedPassword = await encryptPassword(updatedUser.password);
+      updatedUser.password = hashedPassword;
+    }
 
     const updatedUserRecord = await prisma.user.update({
       where: { id: userId },
-      data: updatedUserData,
+      data: {
+        ...updatedUser,
+      }
     });
 
     return updatedUserRecord;
