@@ -33,6 +33,7 @@ export async function createUser(user: UserDto) {
 
     return newUser;
   } catch (e: any) {
+    if (e instanceof AlreadyTakenError) throw new AlreadyTakenError("Email")
     throw new Error("Error Register Error")
   }
 
